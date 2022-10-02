@@ -1,4 +1,4 @@
-This repository is a fork of Deej that provides lower latency communication. It increases the default baud rate as well as granularity of slider values.
+This repository is a fork of Deej that provides lower latency communication. It increases the default baud rate as well as granularity of slider values. A smoothing function is applied to slider values to give them some squish.
 
 # deej
 
