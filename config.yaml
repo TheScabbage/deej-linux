@@ -15,10 +15,10 @@ slider_mapping:
   5: mic
 
 # set this to true if you want the controls inverted (i.e. top is 0%, bottom is 100%)
-invert_sliders: false
+invert_sliders: true
 
 # settings for connecting to the arduino board
-com_port: COM4
+com_port: COM9
 baud_rate: 19200
 
 # adjust the amount of signal noise reduction depending on your hardware quality
