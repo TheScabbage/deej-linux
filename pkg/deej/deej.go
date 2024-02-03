@@ -98,19 +98,12 @@ func (d *Deej) Initialize() error {
 		return fmt.Errorf("init session map: %w", err)
 	}
 
-	// decide whether to run with/without tray
-	if _, noTraySet := os.LookupEnv(envNoTray); noTraySet {
+	// run without tray cuz the dependencies are cancer
+	d.logger.Debugw("Running without tray icon", "reason", "envvar set")
 
-		d.logger.Debugw("Running without tray icon", "reason", "envvar set")
-
-		// run in main thread while waiting on ctrl+C
-		d.setupInterruptHandler()
-		d.run()
-
-	} else {
-		d.setupInterruptHandler()
-		d.initializeTray(d.run)
-	}
+	// run in main thread while waiting on ctrl+C
+	d.setupInterruptHandler()
+	d.run()
 
 	return nil
 }
@@ -156,7 +149,7 @@ func (d *Deej) run() {
 
 				d.signalStop()
 
-				// also notify if the COM port they gave isn't found, maybe their config is wrong
+			// also notify if the COM port they gave isn't found, maybe their config is wrong
 			} else if errors.Is(err, os.ErrNotExist) {
 				d.logger.Warnw("Provided COM port seems wrong, notifying user and closing",
 					"comPort", d.config.ConnectionInfo.COMPort)
@@ -198,8 +191,6 @@ func (d *Deej) stop() error {
 		d.logger.Errorw("Failed to release session map", "error", err)
 		return fmt.Errorf("release session map: %w", err)
 	}
-
-	d.stopTray()
 
 	// attempt to sync on exit - this won't necessarily work but can't harm
 	d.logger.Sync()
