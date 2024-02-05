@@ -1,4 +1,8 @@
-This repository is a fork of Deej that provides lower latency communication. It increases the default baud rate as well as granularity of slider values. A smoothing function is applied to slider values to give them some squish.
+This repository is a fork of Deej that provides lower latency communication.
+It increases the default baud rate as well as granularity of slider values.
+A smoothing function is applied to slider values to give them some squish.
+
+There are also gerbers for a 2-layer PCB that is compatible with an Arduino Nano, located in the /PCB Files/ directory.
 
 # deej
 
