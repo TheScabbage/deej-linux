@@ -1,5 +1,5 @@
-const int NUM_SLIDERS = 5;
-const int analogInputs[NUM_SLIDERS] = {A0, A1, A2, A3, A4};
+const int NUM_SLIDERS = 6;
+const int analogInputs[NUM_SLIDERS] = {A0, A1, A2, A3, A4, A5 };
 
 int analogSliderValues[NUM_SLIDERS];
 
@@ -13,7 +13,7 @@ void setup() {
 
 void loop() {
   updateSliderValues();
-  sendSliderValues(); // Actually send data (all the time)
+  sendSliderValues();
   // printSliderValues(); // For debug
   delay(10);
 }
