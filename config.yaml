@@ -9,7 +9,7 @@
 slider_mapping:
   0: master
   1: firefox
-  2: Discord
+  2: WEBRTC VoiceEngine
   3: deej.current
   4: Speakers (Realtek(R) Audio)
   5: mic
