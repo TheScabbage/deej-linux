@@ -1,4 +1,5 @@
-This repository is a fork of Deej that provides lower latency communication.
+This repository is a fork of Deej that provides better support for linux and lower latency communication.
+Systray functionality has been removed because the dependencies are annoying, and I dont want that functionality.
 It increases the default baud rate as well as granularity of slider values.
 A smoothing function is applied to slider values to give them some squish.
 
