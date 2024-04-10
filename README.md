@@ -5,6 +5,8 @@ A smoothing function is applied to slider values to give them some squish.
 
 There are also gerbers for a 2-layer PCB that is compatible with an Arduino Nano, located in the /PCB Files/ directory.
 
+![deej](assets/deej-scabbage-build.jpg)
+
 # deej
 
 deej is an **open-source hardware volume mixer** for Windows and Linux PCs. It lets you use real-life sliders (like a DJ!) to **seamlessly control the volumes of different apps** (such as your music player, the game you're playing and your voice chat session) without having to stop what you're doing.
