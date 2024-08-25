@@ -8,10 +8,14 @@
 # important: slider indexes start at 0, regardless of which analog pins you're using!
 slider_mapping:
   0: master
-  1: firefox
-  2: .discord-wrapped
-  3: deej.unmapped
-  4: Speakers (Realtek(R) Audio)
+  1:
+    - firefox
+    - zen
+  2:
+    - .discord-wrapped
+    - electron
+  3: chromium
+  4: deej.unmapped
   5: mic
 
 # set this to true if you want the controls inverted (i.e. top is 0%, bottom is 100%)
@@ -25,4 +29,4 @@ baud_rate: 9600
 # 0.015: (excellent hardware)
 # 0.025 (regular hardware)
 # 0.035 (bad, noisy hardware)
-noise_reduction: 0.005
+noise_reduction: 0.01
