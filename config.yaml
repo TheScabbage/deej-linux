@@ -12,7 +12,7 @@ slider_mapping:
     - firefox
     - zen
   2:
-    - .discord-wrapped
+    - .Discord-wrapped
     - electron
   3: chromium
   4: deej.unmapped
@@ -29,4 +29,4 @@ baud_rate: 9600
 # 0.015: (excellent hardware)
 # 0.025 (regular hardware)
 # 0.035 (bad, noisy hardware)
-noise_reduction: 0.01
+noise_reduction: 0.005

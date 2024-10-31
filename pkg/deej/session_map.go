@@ -129,8 +129,7 @@ func (m *sessionMap) setupOnConfigReload() {
 		for {
 			select {
 			case <-configReloadedChannel:
-				m.logger.Info("Detected config reload, attempting to re-acquire all audio sessions")
-				m.refreshSessions(false)
+				m.refreshSessions(false, "detected config reload")
 			}
 		}
 	}()
@@ -150,20 +149,18 @@ func (m *sessionMap) setupOnSliderMove() {
 }
 
 // performance: explain why force == true at every such use to avoid unintended forced refresh spams
-func (m *sessionMap) refreshSessions(force bool) {
-
+func (m *sessionMap) refreshSessions(force bool, reason string) {
 	// make sure enough time passed since the last refresh, unless force is true in which case always clear
 	if !force && m.lastSessionRefresh.Add(minTimeBetweenSessionRefreshes).After(time.Now()) {
 		return
 	}
 
+	m.logger.Debug("Refreshing audio sessions: " + reason)
 	// clear and release sessions first
 	m.clear()
 
 	if err := m.getAndAddSessions(); err != nil {
 		m.logger.Warnw("Failed to re-acquire all audio sessions", "error", err)
-	} else {
-		m.logger.Debug("Re-acquired sessions successfully")
 	}
 }
 
@@ -210,8 +207,7 @@ func (m *sessionMap) handleSliderMoveEvent(event SliderMoveEvent) {
 
 	// first of all, ensure our session map isn't moldy
 	if m.lastSessionRefresh.Add(maxTimeBetweenSessionRefreshes).Before(time.Now()) {
-		m.logger.Debug("Stale session map detected on slider move, refreshing")
-		m.refreshSessions(true)
+		m.refreshSessions(true, "stale session map detected on slider move")
 	}
 
 	// get the targets mapped to this slider from the config
@@ -224,6 +220,7 @@ func (m *sessionMap) handleSliderMoveEvent(event SliderMoveEvent) {
 
 	targetFound := false
 	adjustmentFailed := false
+	failedAdjustment := ""
 
 	// for each possible target for this slider...
 	for _, target := range targets {
@@ -251,6 +248,7 @@ func (m *sessionMap) handleSliderMoveEvent(event SliderMoveEvent) {
 					if err := session.SetVolume(event.PercentValue); err != nil {
 						m.logger.Warnw("Failed to set target session volume", "error", err)
 						adjustmentFailed = true
+						failedAdjustment = session.Key()
 					}
 				}
 			}
@@ -261,13 +259,13 @@ func (m *sessionMap) handleSliderMoveEvent(event SliderMoveEvent) {
 	// processes could've opened since the last time this slider moved.
 	// if they haven't, the cooldown will take care to not spam it up
 	if !targetFound {
-		m.refreshSessions(false)
+		m.refreshSessions(false, "No app found for slider " + fmt.Sprintf("%v", event.SliderID))
 	} else if adjustmentFailed {
 
 		// performance: the reason that forcing a refresh here is okay is that we'll only get here
 		// when a session's SetVolume call errored, such as in the case of a stale master session
 		// (or another, more catastrophic failure happens)
-		m.refreshSessions(true)
+		m.refreshSessions(true, "could not adjust session " + failedAdjustment)
 	}
 }
 

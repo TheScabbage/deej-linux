@@ -138,7 +138,7 @@ func (s *wcaSession) SetVolume(v float32) error {
 		return errRefreshSessions
 	}
 
-	s.logger.Debugw("Adjusting session volume", "to", fmt.Sprintf("%.2f", v))
+	s.logger.Debug(fmt.Sprintf("Adjusting session %-20s volume to %.2f", s.Key(), v))
 
 	return nil
 }
@@ -178,7 +178,7 @@ func (s *masterSession) SetVolume(v float32) error {
 		return fmt.Errorf("adjust session volume: %w", err)
 	}
 
-	s.logger.Debugw("Adjusting session volume", "to", fmt.Sprintf("%.2f", v))
+	s.logger.Debug(fmt.Sprintf("Adjusting session %-20s volume to %.2f", s.Key(), v))
 
 	return nil
 }

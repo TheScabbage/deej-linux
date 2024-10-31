@@ -134,36 +134,49 @@ func (d *Deej) run() {
 	// watch the config file for changes
 	go d.config.WatchConfigFileChanges()
 
-	// connect to the arduino for the first time
-	go func() {
-		if err := d.serial.Start(); err != nil {
-			d.logger.Warnw("Failed to start first-time serial connection", "error", err)
+	retry := true
 
-			// If the port is busy, that's because something else is connected - notify and quit
-			if errors.Is(err, os.ErrPermission) {
-				d.logger.Warnw("Serial port seems busy, notifying user and closing",
-					"comPort", d.config.ConnectionInfo.COMPort)
+	for retry {
+		// connect to the arduino for the first time
+		go func() {
+			err := d.serial.Start()
+			if err != nil {
+				d.logger.Warnw("Failed to start first-time serial connection", "error", err)
 
-				d.notifier.Notify(fmt.Sprintf("Can't connect to %s!", d.config.ConnectionInfo.COMPort),
-					"This serial port is busy, make sure to close any serial monitor or other deej instance.")
+				// If the port is busy, that's because something else is connected - notify and quit
+				if errors.Is(err, os.ErrPermission) {
+					d.logger.Warnw("Serial port seems busy, notifying user and closing",
+						"comPort", d.config.ConnectionInfo.COMPort)
 
-				d.signalStop()
+					d.notifier.Notify(fmt.Sprintf("Can't connect to %s!", d.config.ConnectionInfo.COMPort),
+						"This serial port is busy, make sure to close any serial monitor or other deej instance.")
 
-			// also notify if the COM port they gave isn't found, maybe their config is wrong
-			} else if errors.Is(err, os.ErrNotExist) {
-				d.logger.Warnw("Provided COM port seems wrong, notifying user and closing",
-					"comPort", d.config.ConnectionInfo.COMPort)
+					d.signalStop()
 
-				d.notifier.Notify(fmt.Sprintf("Can't connect to %s!", d.config.ConnectionInfo.COMPort),
-					"This serial port doesn't exist, check your configuration and make sure it's set correctly.")
+					// also notify if the COM port they gave isn't found, maybe their config is wrong
+				} else if errors.Is(err, os.ErrNotExist) {
+					d.logger.Warnw("Provided COM port seems wrong, notifying user and closing",
+						"comPort", d.config.ConnectionInfo.COMPort)
 
-				d.signalStop()
+					d.notifier.Notify(fmt.Sprintf("Can't connect to %s!", d.config.ConnectionInfo.COMPort),
+						"This serial port doesn't exist, check your configuration and make sure it's set correctly.")
+
+					d.signalStop()
+				}
 			}
-		}
-	}()
+		}()
 
-	// wait until stopped (gracefully)
-	<-d.stopChannel
+		// wait until stopped (gracefully)
+		stop := <-d.stopChannel
+		d.logger.Infow("Stop channel signalled.", "stop", stop);
+
+		if stop {
+			retry = false
+		}
+
+		d.logger.Info("Retrying serial connection...");
+	}
+
 	d.logger.Debug("Stop channel signaled, terminating")
 
 	if err := d.stop(); err != nil {

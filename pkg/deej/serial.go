@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,7 +52,7 @@ func NewSerialIO(deej *Deej, logger *zap.SugaredLogger) (*SerialIO, error) {
 	sio := &SerialIO{
 		deej:                deej,
 		logger:              logger,
-		stopChannel:         make(chan bool),
+		stopChannel:         make(chan bool, 4),
 		connected:           false,
 		conn:                nil,
 		sliderMoveConsumers: []chan SliderMoveEvent{},
@@ -119,7 +120,15 @@ func (sio *SerialIO) Start() error {
 			case <-sio.stopChannel:
 				sio.close(namedLogger)
 			case line := <-lineChannel:
-				sio.handleLine(namedLogger, line)
+				if line == "BORKED" {
+					sio.close(namedLogger)
+					sio.logger.Info("RX bork signal from reader. Signalling stop channel...");
+					sio.stopChannel <- false
+					sio.logger.Info("Stop channel signalled with a retry.");
+					os.Exit(1)
+				} else {
+					sio.handleLine(namedLogger, line)
+				}
 			}
 		}
 	}()
@@ -205,12 +214,12 @@ func (sio *SerialIO) readLine(logger *zap.SugaredLogger, reader *bufio.Reader) c
 		for {
 			line, err := reader.ReadString('\n')
 			if err != nil {
-
 				if sio.deej.Verbose() {
 					logger.Warnw("Failed to read line from serial", "error", err, "line", line)
 				}
 
-				// just ignore the line, the read loop will stop after this
+				// Report the error via the line channel
+				ch <- "BORKED"
 				return
 			}
 
